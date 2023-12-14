@@ -1,0 +1,241 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html lang="en">
+<head>
+
+
+     <!-- 'viewport' is used by bootstrap to respond to device size -->
+     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+     <!-- jquery; CDN load is usually quick because it's likely cached -->
+     <script type="text/javascript"
+             src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js">
+     </script>
+
+
+     <!-- Latest compiled and minified JavaScript -->
+     <script
+     src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"
+     integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V"
+     crossorigin="anonymous">
+       </script>
+
+     <!-- moment.js is the JavaScript equivalent of arrow.py -->
+     <script src="{{ url_for('static', filename="js/moment.min.js") }}"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Planner</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #fffcf2;
+            margin: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: #006d77;
+        }
+
+        form {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            width: 300px;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #495057;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #006d77;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #a8dadc;
+        }
+
+        #weatherInfo {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            width: 300px;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ced4da;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #006d77;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Weather Planner</h1>
+   
+    <form class="control" id="plannerForm" role="form" action="/new" method="POST">
+        <label for="date">Date:</label>
+        <input type="date" name="date" id="date" required>
+
+        <label for="Hour">Hour:</label>
+
+        <select class="form-select form-select-sm"  name="Hour" id="Hour" required>
+            {% for i in range(24) %}
+              <option value="{{ i }}">{{ i }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="description">Plan Description:</label>
+        <input type="text" name="plan" id="description" required>
+
+        <label for="place">Place:</label>
+
+        <select class="form-select form-select-sm"  name="place" id="place" required>
+            <option value="Qassim University">Qassim University</option>
+            <option value="Riyadh">Riyadh</option>
+            <option value="Jeddah">Jeddah</option>
+        </select>
+
+        <label for="w">weather:</label>
+        
+        <input type="text" name ="t" id="t" readonly>
+        <input type="text" name ="w" id="w" readonly>
+        <input type="text" name ="r" id="r" readonly>
+        
+        <button type="submit" >Add to the list</button>
+    </form>
+    <div id="weatherInfo"></div>
+   
+    <table id="plannedTrips">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Place</th>
+                <th>Temperature (°C)</th>
+                <th>Wind Speed (m/s)</th>
+                <th>Chance of Rain (%)</th>
+            </tr>
+        </thead>
+        <tbody>
+           
+             {% for item in items %} 
+             
+            <tr>
+                <td>{{ item.closeInfoDone }}</td>
+                <td>{{ item.kmInfoDone }}</td>
+                <td>{{ item.openInfoDone }}</td>
+                <td>{{ item.tInfoDone }}</td>
+                <td>{{ item.wInfoDone }}</td>
+                <td>{{ item.rInfoDone }}</td>
+              </tr>
+             {% endfor %}
+        </tbody>
+    </table>
+
+    
+     <script type="text/javascript">
+
+        var SCRIPT_ROOT = {{ request.script_root|tojson|safe }} ;
+        var TIME_CALC_URL = SCRIPT_ROOT + "/_calc_times";
+
+        // Pass calc_times a <td> element containing the data for a control.
+        // It extracts the distance and calls the server to get times to
+        // fill in open and close times in a human-readable format.
+
+        function calc_times(control) {
+           
+            var plan = $("input[name='plan']").val();
+            var place = $("#place").val();
+            var date = $("input[name='date']").val();
+            var weather = control.find("input[name='w']");
+            var rain = control.find("input[name='r']");
+            var tem = control.find("input[name='t']");
+            var Hour = $("#Hour").val();
+            Hour = parseInt(Hour, 10);
+            
+
+            $.getJSON(TIME_CALC_URL,
+                { plan: plan, place: place, date: date ,Hour: Hour},
+                // response handler
+                function(data) {
+                    var times = data.result;
+                    console.log(times)
+                    console.log("Got a response: " +  times);
+                    //console.log("Response.open = " + times.open);
+                    weather.val("Wind : " + times.wind);
+                    tem.val("Temperature: " + times.tem);
+                    rain.val("Rain : " + times.rain);
+                    //close_time_field.val( moment(times.close).format("ddd M/D H:mm"));
+                } // end of handler function
+            );// End of getJSON
+        }
+        $(document).ready(function(){
+            // Do the following when the page is finished loading
+
+            $('input[name="date"]').change(
+                function() {
+                   
+                    var control_entry = $(this).parents(".control")
+                    // Then calculate times for this entry
+                    calc_times(control_entry);
+                });
+
+            $("#place").change(
+                function() {
+                   
+                    var control_entry = $(this).parents(".control")
+                    // Then calculate times for this entry
+                    calc_times(control_entry);
+                });
+
+                $("#Hour").change(
+                function() {
+                   
+                    var control_entry = $(this).parents(".control")
+                    // Then calculate times for this entry
+                    calc_times(control_entry);
+                });
+        });   // end of what we do on document 
+
+       
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+__pycache__
+*.py[cod]
+*$py.class
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+.cache
+
+# students
+.vscode
+
+# macOS metadata
+.DS_Store
+
+# tmp process id file
+,pypid
+
+# config files
+*.ini
+
+# pycharm config files
+.idea

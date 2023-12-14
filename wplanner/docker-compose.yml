@@ -1,0 +1,13 @@
+services:
+  web:
+    build: .
+    command: python3 apii.py
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/todo
+    links:
+      - db
+  db:
+    image: mongo:7.0.2
+    hostname: "todo_mongodb"
