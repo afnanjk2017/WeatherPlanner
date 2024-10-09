@@ -1,4 +1,3 @@
-
 # Project-7-Weather-Planner
 
 A personal planner that uses an API to incorporate weather information. 
